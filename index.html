@@ -1,0 +1,64 @@
+<!doctype html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4/dist/reveal.css" />
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section data-transition="none">
+                <h1>animated sequence diagram</h1>
+            </section>
+
+            <section data-transition="none">
+                <pre class="mermaid">
+                    sequenceDiagram
+                      participant kaka as writer/1
+                      participant dudu as writer/2
+                      participant sql as db
+                      participant baba as reader
+                      kaka->>sql: INSERT INTO log DEFAULT VALUES
+                      note right of sql: global_id 1
+                      baba->>+sql: SELECT global_id FROM log ORDER BY global_id
+                      sql-->>-baba: [ ]
+                      kaka->>sql: COMMIT
+                      baba->>+sql: SELECT global_id FROM log ORDER BY global_id
+                      sql-->>-baba: [1]
+                      dudu->>sql: INSERT INTO log DEFAULT VALUES
+                      note right of sql: global_id 2
+                      dudu->>sql: COMMIT
+                      baba->>+sql: SELECT global_id FROM log ORDER BY global_id
+                      sql-->>-baba: [1, 2]
+                </pre>
+            </section>
+        </div>
+    </div>
+
+    <script type="module">
+        import mermaid from "https://cdn.jsdelivr.net/gh/mostlyobvious/mermaid@animated-sequence/packages/mermaid/dist/mermaid.esm.min.mjs";
+        import Reveal from "https://cdn.jsdelivr.net/npm/reveal.js@4/dist/reveal.esm.js";
+
+        mermaid.initialize({
+            startOnLoad: false,
+            fontFamily: "system-ui",
+            theme: "base",
+            sequence: {
+                mirrorActors: false,
+                showSequenceNumbers: true,
+            },
+            themeCSS: ".actor { stroke-width: 2; }",
+        });
+
+        let deck = new Reveal({});
+        deck.initialize();
+        deck.addEventListener("ready", (event) => {
+            mermaid.run({
+                querySelector: ".mermaid",
+                postRenderCallback: () => {
+                    document
+                        .querySelectorAll('g:has(.messageText), g:has(.note), g:has([class^="activation"])')
+                        .forEach((el) => el.classList.add("fragment"));
+                },
+            });
+        });
+    </script>
+</body>
